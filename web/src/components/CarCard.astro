@@ -38,9 +38,10 @@ const specs = [
     data-category={car.category}
     data-lk-price={lk?.price} data-lk-note={lk?.note} data-lk-wa={lk?.wa}
     data-ds-price={ds?.price} data-ds-note={ds?.note} data-ds-wa={ds?.wa}
-    class="flex flex-col overflow-hidden rounded-card border border-line bg-card"
+    data-reveal
+    class="group flex flex-col overflow-hidden rounded-card border border-line bg-card transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-raised"
   >
-    <div class="relative">
+    <div class="relative overflow-hidden">
       <img
         src={imageSrc(car.image, 640)}
         srcset={imageSrcset(car.image, [400, 640, 800])}
@@ -50,7 +51,7 @@ const specs = [
         height="480"
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
-        class:list={['aspect-[4/3] w-full object-cover', !car.isAvailable && 'opacity-50 grayscale']}
+        class:list={['aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out', car.isAvailable ? 'group-hover:scale-[1.04]' : 'opacity-50 grayscale']}
       />
       <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-card to-transparent" aria-hidden="true"></div>
       {!car.isAvailable ? (

@@ -38,7 +38,7 @@ const services = [
 
 <section id="layanan" class="scroll-mt-20 bg-card/60 py-14 md:py-20" aria-labelledby="layanan-title">
   <div class="container-x">
-    <header class="max-w-2xl">
+    <header data-reveal class="max-w-2xl">
       <p class="text-label-sm uppercase text-accent-text">Spesialis Sumatera Utara</p>
       <h2 id="layanan-title" class="mt-2 font-display text-headline-lg-mobile md:text-headline-lg">Layanan Populer &amp; Rute Favorit</h2>
       <p class="mt-3 text-body-md text-muted">Rute antar-kota dan destinasi ikonik ditangani langsung oleh tim supir yang paham rute alternatif dan kondisi lalu lintas.</p>
@@ -46,7 +46,7 @@ const services = [
 
     <ul class="mt-8 grid gap-6 md:grid-cols-3">
       {services.map(({ slug, icon: Icon, title, text, cta, message }) => (
-        <li class="flex flex-col rounded-card border border-line border-t-2 border-t-accent bg-elevated p-6">
+        <li data-reveal class="flex flex-col rounded-card border border-line border-t-2 border-t-accent bg-elevated p-6 transition-[translate,border-color] duration-300 hover:-translate-y-1 hover:border-accent/40">
           <span class="flex size-12 items-center justify-center rounded-control bg-line text-accent"><Icon class="size-6" aria-hidden="true" /></span>
           <h3 class="mt-4 font-display text-headline-sm">{title}</h3>
           <p class="mt-2 flex-1 text-body-sm text-muted">{text}</p>

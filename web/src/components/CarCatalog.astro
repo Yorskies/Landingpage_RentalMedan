@@ -15,17 +15,19 @@ const pill = 'min-h-11 rounded-chip bg-card px-4 text-label-md text-muted transi
 
 <section id="armada" class="scroll-mt-20 py-14 md:py-20" aria-labelledby="armada-title">
   <div class="container-x">
-    <header class="mx-auto max-w-2xl text-center">
+    <header data-reveal class="mx-auto max-w-2xl text-center">
       <p class="text-label-sm uppercase text-accent-text">Daftar kendaraan</p>
       <h2 id="armada-title" class="mt-2 font-display text-headline-lg-mobile md:text-headline-lg">Pilih Armada &amp; Paket Sewa</h2>
       <p class="mt-3 text-body-md text-muted">Pilih paket Lepas Kunci atau Dengan Supir, lalu tanyakan langsung ketersediaan unit lewat WhatsApp.</p>
     </header>
 
     <div id="catalog" data-catalog class="mt-8">
-      <div class="flex justify-center">
-        <div role="group" aria-label="Pilih paket sewa" class="grid w-full max-w-md grid-cols-2 gap-1 rounded-full border border-line bg-card p-1">
-          <button type="button" data-pkg-btn="lepas_kunci" aria-pressed="true" class="min-h-11 rounded-full px-4 text-label-md text-muted transition-all aria-pressed:bg-accent aria-pressed:text-white aria-pressed:shadow-glow-accent">Lepas Kunci</button>
-          <button type="button" data-pkg-btn="dengan_supir" aria-pressed="false" class="min-h-11 rounded-full px-4 text-label-md text-muted transition-all aria-pressed:bg-accent aria-pressed:text-white aria-pressed:shadow-glow-accent">Dengan Supir</button>
+      <div data-reveal class="flex justify-center">
+        <div role="group" aria-label="Pilih paket sewa" data-pkg-group data-active="self" class="group relative grid w-full max-w-md grid-cols-2 gap-1 rounded-full border border-line bg-card p-1">
+          <!-- Sliding indicator: moved by data-active on the group (width = one button: 50% minus half of padding+gap) -->
+          <span aria-hidden="true" class="absolute inset-y-1 left-1 w-[calc(50%-0.375rem)] rounded-full bg-accent shadow-glow-accent transition-transform duration-300 ease-out group-data-[active=driver]:translate-x-[calc(100%+0.25rem)]"></span>
+          <button type="button" data-pkg-btn="lepas_kunci" aria-pressed="true" class="relative min-h-11 rounded-full px-4 text-label-md text-muted aria-pressed:text-white">Lepas Kunci</button>
+          <button type="button" data-pkg-btn="dengan_supir" aria-pressed="false" class="relative min-h-11 rounded-full px-4 text-label-md text-muted aria-pressed:text-white">Dengan Supir</button>
         </div>
       </div>
 
@@ -61,8 +63,17 @@ const pill = 'min-h-11 rounded-chip bg-card px-4 text-label-md text-muted transi
     const pkgButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-pkg-btn]')];
     const catButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-cat-btn]')];
     const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const group = root.querySelector<HTMLElement>('[data-pkg-group]');
     let pkg: Pkg = 'lepas_kunci';
     let category = 'all';
+
+    const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Text that actually changed fades in (single-package units keep their text, so they do not flicker)
+    function setText(el: Element, text: string) {
+      if (el.textContent === text) return;
+      el.textContent = text;
+      if (motion) el.animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 250, easing: 'ease-out' });
+    }
 
     function render() {
       let visible = 0;
@@ -72,17 +83,22 @@ const pill = 'min-h-11 rounded-chip bg-card px-4 text-label-md text-muted transi
         const want = pkg === 'lepas_kunci' ? 'lk' : 'ds';
         const key = d[`${want}Price`] ? want : want === 'lk' ? 'ds' : 'lk';
         const effective: Pkg = key === 'lk' ? 'lepas_kunci' : 'dengan_supir';
-        card.querySelector('[data-price]')!.textContent = d[`${key}Price`] ?? '';
-        card.querySelector('[data-note]')!.textContent = d[`${key}Note`] ?? '';
-        card.querySelector('[data-label]')!.textContent = effective === 'lepas_kunci' ? 'Lepas Kunci' : 'Dengan Supir';
+        setText(card.querySelector('[data-price]')!, d[`${key}Price`] ?? '');
+        setText(card.querySelector('[data-note]')!, d[`${key}Note`] ?? '');
+        setText(card.querySelector('[data-label]')!, effective === 'lepas_kunci' ? 'Lepas Kunci' : 'Dengan Supir');
         const cta = card.querySelector<HTMLAnchorElement>('[data-cta]');
         if (cta) {
           cta.href = d[`${key}Wa`] ?? '';
           cta.dataset.packageType = effective;
         }
         const show = category === 'all' || d.category === category;
+        const wasHidden = card.hidden;
         card.hidden = !show;
         if (show) visible++;
+        if (show && wasHidden) {
+          card.removeAttribute('data-reveal'); // a filtered-in card animates here, not via scroll reveal
+          if (motion) card.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 350, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        }
       }
       if (empty) empty.hidden = visible > 0;
     }
@@ -90,6 +106,8 @@ const pill = 'min-h-11 rounded-chip bg-card px-4 text-label-md text-muted transi
     pkgButtons.forEach((b) => b.addEventListener('click', () => {
       pkg = b.dataset.pkgBtn as Pkg;
       pkgButtons.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+      // underscores in a Tailwind data-variant value become spaces, hence "driver" instead of "dengan_supir"
+      if (group) group.dataset.active = pkg === 'dengan_supir' ? 'driver' : 'self';
       render();
     }));
     catButtons.forEach((b) => b.addEventListener('click', () => {

@@ -22,6 +22,7 @@ const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
     <link rel="canonical" href={Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <script is:inline>document.documentElement.classList.add('js')</script>
     {gtmId && (
       <script is:inline define:vars={{ gtmId }}>
         (function (w, d, s, l, i) {
@@ -64,6 +65,38 @@ const clarityId = import.meta.env.PUBLIC_CLARITY_ID;
           package_type: el.dataset.packageType || 'general',
         });
       });
+    </script>
+    <script>
+      // Scroll reveal: each [data-reveal] element fades up once when it enters the viewport.
+      // Elements that enter together are staggered by 70ms (max 4 steps), which also fits any column count.
+      const items = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || !('IntersectionObserver' in window)) {
+        items.forEach((el) => el.removeAttribute('data-reveal'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            let n = 0;
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              const el = entry.target as HTMLElement;
+              io.unobserve(el);
+              el.style.setProperty('--reveal-delay', `${Math.min(n++, 4) * 70}ms`);
+              el.classList.add('is-visible');
+              const done = (ev: TransitionEvent) => {
+                if (ev.target !== el || ev.propertyName !== 'opacity') return;
+                el.removeEventListener('transitionend', done);
+                el.removeAttribute('data-reveal');
+                el.classList.remove('is-visible');
+                el.style.removeProperty('--reveal-delay');
+              };
+              el.addEventListener('transitionend', done);
+            }
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+        );
+        items.forEach((el) => io.observe(el));
+      }
     </script>
   </body>
 </html>

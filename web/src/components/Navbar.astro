@@ -18,7 +18,7 @@ const lead = words.slice(0, -1).join(' ');
 const tail = words.at(-1);
 ---
 
-<header class="sticky top-0 z-50 border-b border-line bg-ground/85 backdrop-blur-xl">
+<header data-nav class="sticky top-0 z-50 border-b border-line bg-ground/85 backdrop-blur-xl">
   <div class="container-x flex h-16 items-center justify-between gap-4">
     <a href="#top" class="min-w-0 truncate font-display text-title-md font-extrabold uppercase tracking-tight">
       {lead} <span class="text-accent">{tail}</span>
@@ -75,4 +75,10 @@ const tail = words.at(-1);
   button?.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
   menu?.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) setOpen(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+  // Solid background only after the page has scrolled (see [data-nav] in global.css)
+  const nav = document.querySelector('[data-nav]');
+  const sync = () => nav?.toggleAttribute('data-scrolled', scrollY > 8);
+  sync();
+  addEventListener('scroll', sync, { passive: true });
 </script>

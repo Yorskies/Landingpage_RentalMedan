@@ -8,7 +8,7 @@ const { waUrl } = Astro.props;
 {waUrl && (
   <>
     <!-- Mobile: full-width sticky bar, safe-area aware -->
-    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-ground/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
+    <div data-float="bar" class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-ground/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
       <a
         href={waUrl}
         target="_blank"
@@ -26,11 +26,29 @@ const { waUrl } = Astro.props;
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat via WhatsApp"
+      data-float="btn"
       data-wa-track="true"
       data-wa-location="floating_button"
-      class="fixed bottom-6 right-6 z-40 hidden size-14 items-center justify-center rounded-full bg-wa text-white shadow-glow-wa transition-colors hover:bg-wa-hover md:flex"
+      class="fixed bottom-6 right-6 z-40 hidden size-14 items-center justify-center rounded-full bg-wa text-white shadow-glow-wa hover:bg-wa-hover md:flex"
     >
       <WhatsAppIcon class="size-7" />
     </a>
   </>
 )}
+
+<script>
+  // Show the floating CTAs once the hero's own WhatsApp button has scrolled out of view (above the viewport)
+  const heroCta = document.querySelector('[data-wa-location="hero"]');
+  const floats = document.querySelectorAll('[data-float]');
+  if (floats.length) {
+    if (heroCta && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => {
+        const show = !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+        floats.forEach((el) => el.classList.toggle('is-shown', show));
+      }).observe(heroCta);
+    } else {
+      // No hero button to wait for: show immediately
+      floats.forEach((el) => el.classList.add('is-shown'));
+    }
+  }
+</script>

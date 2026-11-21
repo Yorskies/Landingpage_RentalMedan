@@ -105,3 +105,66 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 }
+
+/*
+ * Motion: subtle, transform/opacity only. Unlayered on purpose so it beats Tailwind utilities such as transition-colors.
+ * Every hidden "before" state is scoped to html.js (set by an inline script in <head>), so visitors without JS see everything.
+ */
+:root { --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Scroll reveal: fade up once. The script removes [data-reveal] after the transition so hover styles take over cleanly. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--ease-smooth), transform 0.5s var(--ease-smooth);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+html.js [data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* Navbar: transparent over the hero, solid once the page scrolls */
+[data-nav] {
+  transition: background-color 0.3s, border-color 0.3s, backdrop-filter 0.3s, -webkit-backdrop-filter 0.3s;
+}
+html.js [data-nav]:not([data-scrolled]) {
+  background-color: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Floating WhatsApp CTAs appear once the hero CTA is out of view; visibility keeps hidden links out of the tab order */
+html.js [data-float] {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth), visibility 0s linear 0.3s, background-color 0.2s, scale 0.2s;
+}
+html.js [data-float="bar"] { transform: translateY(100%); }
+html.js [data-float="btn"] { transform: translateY(1rem) scale(0.9); }
+html.js [data-float].is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth), visibility 0s, background-color 0.2s, scale 0.2s;
+}
+
+/* Press feedback on every WhatsApp CTA and catalog control */
+a[data-wa-track], [data-pkg-btn], [data-cat-btn] {
+  transition-property: color, background-color, border-color, box-shadow, scale;
+  transition-duration: 0.2s;
+}
+a[data-wa-track]:active, [data-pkg-btn]:active, [data-cat-btn]:active { scale: 0.98; }
+
+/* Accordion: animate height where supported (Chromium); other browsers open instantly */
+@media (prefers-reduced-motion: no-preference) {
+  details { interpolate-size: allow-keywords; }
+  details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size 0.3s var(--ease-smooth), content-visibility 0.3s allow-discrete;
+  }
+  details[open]::details-content { block-size: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
