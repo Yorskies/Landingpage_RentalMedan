@@ -1,0 +1,106 @@
+---
+import Cog from '@lucide/astro/icons/cog';
+import Users from '@lucide/astro/icons/users';
+import Fuel from '@lucide/astro/icons/fuel';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { PACKAGE_LABEL, buildCarMessage, buildWhatsAppUrl, formatIDR, type PackageType } from '../lib/formatters';
+import { imageSrc, imageSrcset, type Car } from '../lib/sanity';
+
+interface Props { car: Car; phone?: string; eager?: boolean }
+const { car, phone, eager = false } = Astro.props;
+
+// Per-package data is rendered on the server; the client script only swaps it in (no formatting logic in the browser).
+const packages = (['lepas_kunci', 'dengan_supir'] as PackageType[]).flatMap((pkg) => {
+  const price = pkg === 'lepas_kunci' ? car.priceSelfDrive : car.priceWithDriver;
+  if (!price || price <= 0) return [];
+  return [{
+    pkg,
+    price: formatIDR(price),
+    note: (pkg === 'lepas_kunci' ? car.selfDriveNote : car.driverNote) ?? '',
+    wa: phone ? buildWhatsAppUrl(phone, buildCarMessage(car.name, pkg, price, car.isAvailable)) : '',
+  }];
+});
+const [first] = packages;
+const only = packages.length === 1 ? first : undefined;
+const lk = packages.find((p) => p.pkg === 'lepas_kunci');
+const ds = packages.find((p) => p.pkg === 'dengan_supir');
+
+const specs = [
+  { icon: Cog, text: car.transmission },
+  { icon: Users, text: `${car.seats} Kursi` },
+  { icon: Fuel, text: car.fuelType },
+].filter((s) => s.text);
+---
+
+{first && (
+  <article
+    data-car-card
+    data-category={car.category}
+    data-lk-price={lk?.price} data-lk-note={lk?.note} data-lk-wa={lk?.wa}
+    data-ds-price={ds?.price} data-ds-note={ds?.note} data-ds-wa={ds?.wa}
+    class="flex flex-col overflow-hidden rounded-card border border-line bg-card"
+  >
+    <div class="relative">
+      <img
+        src={imageSrc(car.image, 640)}
+        srcset={imageSrcset(car.image, [400, 640, 800])}
+        sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+        alt={car.imageAlt}
+        width="640"
+        height="480"
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        class:list={['aspect-[4/3] w-full object-cover', !car.isAvailable && 'opacity-50 grayscale']}
+      />
+      <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-card to-transparent" aria-hidden="true"></div>
+      {!car.isAvailable ? (
+        <span class="absolute left-3 top-3 rounded-chip bg-line px-2.5 py-1 text-label-sm uppercase text-fg">Sedang Disewa</span>
+      ) : car.isFeatured ? (
+        <span class="absolute left-3 top-3 rounded-chip bg-accent px-2.5 py-1 text-label-sm uppercase text-white">Favorit</span>
+      ) : null}
+      <span class="absolute right-3 top-3 rounded-chip bg-ground/80 px-2.5 py-1 text-label-sm uppercase text-muted backdrop-blur">{car.category}</span>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-4 p-5">
+      <h3 class="font-display text-headline-sm">{car.name}</h3>
+
+      {specs.length > 0 && (
+        <ul class="flex flex-wrap gap-x-4 gap-y-2 text-body-sm text-muted">
+          {specs.map(({ icon: Icon, text }) => (
+            <li class="inline-flex items-center gap-1.5"><Icon class="size-4 text-accent" aria-hidden="true" />{text}</li>
+          ))}
+        </ul>
+      )}
+
+      <div class="mt-auto">
+        <div class="flex items-end justify-between gap-3 border-t border-line pt-4">
+          <span class="text-label-md text-muted" data-label>{PACKAGE_LABEL[first.pkg]}</span>
+          <span class="whitespace-nowrap text-right">
+            <span class="font-display text-headline-md font-extrabold" data-price>{first.price}</span><span class="text-label-sm text-muted">/hari</span>
+          </span>
+        </div>
+        <p class="mt-1 min-h-5 text-body-sm text-muted" data-note>{first.note}</p>
+        <p class="mt-1 text-label-sm text-muted" data-only-note hidden={!only}>
+          {only && `Hanya tersedia paket ${PACKAGE_LABEL[only.pkg]}`}
+        </p>
+
+        {phone && (
+          <a
+            data-cta
+            href={first.wa}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-wa-track="true"
+            data-wa-location="catalog_card"
+            data-car-name={car.name}
+            data-package-type={first.pkg}
+            class="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-wa px-4 text-label-md text-white transition-colors hover:bg-wa-hover"
+          >
+            <WhatsAppIcon class="size-4" />
+            {car.isAvailable ? 'Tanya via WhatsApp' : 'Tanya Jadwal Tersedia'}
+          </a>
+        )}
+      </div>
+    </div>
+  </article>
+)}

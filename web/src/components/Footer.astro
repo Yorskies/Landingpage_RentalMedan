@@ -1,0 +1,30 @@
+---
+import type { SiteSettings } from '../lib/types';
+
+interface Props { settings: SiteSettings | null }
+const { settings } = Astro.props;
+const brand = settings?.brandName ?? '';
+---
+
+<footer class="border-t border-line bg-ground py-10 pb-28 md:pb-10">
+  <div class="container-x grid gap-8 md:grid-cols-3">
+    <div>
+      <p class="font-display text-title-md font-extrabold uppercase">{brand}</p>
+      <p class="mt-2 max-w-xs text-body-sm text-muted">Sewa mobil Lepas Kunci dan Dengan Supir di Medan, Bandara Kualanamu, dan sekitarnya.</p>
+    </div>
+    {settings && (settings.officeAddress || settings.operatingHours) && (
+      <div>
+        <p class="text-label-sm uppercase text-muted">Kantor Operasional</p>
+        {settings.officeAddress && <p class="mt-2 text-body-sm">{settings.officeAddress}</p>}
+        {settings.operatingHours && <p class="mt-1 text-body-sm text-muted">{settings.operatingHours}</p>}
+      </div>
+    )}
+    {settings?.whatsappNumber && (
+      <div>
+        <p class="text-label-sm uppercase text-muted">WhatsApp</p>
+        <p class="mt-2 text-body-sm">+{settings.whatsappNumber}</p>
+      </div>
+    )}
+  </div>
+  <p class="container-x mt-8 text-body-sm text-muted">© {new Date().getFullYear()} {brand}</p>
+</footer>

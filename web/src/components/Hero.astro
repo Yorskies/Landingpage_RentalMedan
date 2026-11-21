@@ -1,0 +1,95 @@
+---
+import { formatIDR } from '../lib/formatters';
+import { imageSrc, imageSrcset, type Car } from '../lib/sanity';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import CarIcon from '@lucide/astro/icons/car';
+import KeyRound from '@lucide/astro/icons/key-round';
+import PlaneLanding from '@lucide/astro/icons/plane-landing';
+import Receipt from '@lucide/astro/icons/receipt';
+
+interface Props { minPrice: number | null; waUrl?: string; car?: Car }
+const { minPrice, waUrl, car } = Astro.props;
+
+const chips = [
+  { icon: KeyRound, text: 'Lepas Kunci & Dengan Supir' },
+  { icon: PlaneLanding, text: 'Antar Jemput Bandara KNO' },
+  { icon: Receipt, text: 'Harga Transparan' },
+];
+---
+
+<section id="top" class="relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgb(220_38_38/0.16),transparent_60%)]">
+  <div class="container-x grid items-center gap-8 py-8 md:py-14 lg:grid-cols-2 lg:gap-12">
+    <div>
+      <p class="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-label-sm text-muted">
+        <span class="size-2 rounded-full bg-accent" aria-hidden="true"></span>
+        Melayani Medan, Bandara Kualanamu &amp; Danau Toba
+      </p>
+      <h1 class="mt-4 font-display text-display-hero-mobile md:text-display-hero">
+        Sewa Mobil Medan Cepat, <span class="text-accent">Aman</span> &amp; Siap Pakai
+      </h1>
+      <p class="mt-4 max-w-xl text-body-lg text-muted">
+        Pilih <strong class="font-semibold text-fg">Lepas Kunci</strong> atau <strong class="font-semibold text-fg">Dengan Supir</strong>.
+        Armada terawat, siap untuk perjalanan kota, antar-jemput bandara, dan wisata Danau Toba.
+      </p>
+
+      {minPrice && (
+        <p class="mt-6 text-body-md text-muted">
+          Mulai <span class="font-display text-headline-md font-extrabold text-fg">{formatIDR(minPrice)}</span><span class="text-body-sm">/hari</span>
+        </p>
+      )}
+
+      <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+        {waUrl && (
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-wa-track="true"
+            data-wa-location="hero"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-control bg-wa px-6 font-display text-title-md font-bold text-white shadow-glow-wa transition-colors hover:bg-wa-hover"
+          >
+            <WhatsAppIcon /> Tanya via WhatsApp
+          </a>
+        )}
+        <a
+          href="#armada"
+          class="inline-flex min-h-12 items-center justify-center rounded-control border border-line px-6 text-label-md text-fg transition-colors hover:border-accent hover:bg-accent/5"
+        >
+          Lihat Daftar Harga
+        </a>
+      </div>
+
+      <ul class="mt-8 flex flex-wrap gap-2">
+        {chips.map(({ icon: Icon, text }) => (
+          <li class="inline-flex items-center gap-2 rounded-chip bg-card px-3 py-2 text-body-sm text-muted">
+            <Icon class="size-4 text-accent" aria-hidden="true" /> {text}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {car && (
+      <figure class="overflow-hidden rounded-card border border-line bg-card shadow-raised">
+        <img
+          src={imageSrc(car.image, 960)}
+          srcset={imageSrcset(car.image, [480, 720, 960, 1200])}
+          sizes="(min-width: 1024px) 55vw, 100vw"
+          alt={car.imageAlt}
+          width="960"
+          height="720"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="aspect-[4/3] w-full object-cover"
+        />
+        <figcaption class="flex items-center justify-between gap-3 bg-elevated px-5 py-4">
+          <span>
+            <span class="block text-label-sm uppercase text-muted">Armada pilihan</span>
+            <span class="block font-display text-headline-sm">{car.name}</span>
+          </span>
+          <CarIcon class="size-6 shrink-0 text-accent" aria-hidden="true" />
+        </figcaption>
+      </figure>
+    )}
+  </div>
+</section>

@@ -1,0 +1,78 @@
+---
+import Menu from '@lucide/astro/icons/menu';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+
+interface Props { brandName: string; waUrl?: string; showTerms: boolean; showTestimonials: boolean }
+const { brandName, waUrl, showTerms, showTestimonials } = Astro.props;
+
+const links = [
+  { href: '#armada', label: 'Armada' },
+  { href: '#layanan', label: 'Layanan' },
+  ...(showTerms ? [{ href: '#syarat', label: 'Syarat & Ketentuan' }] : []),
+  ...(showTestimonials ? [{ href: '#testimoni', label: 'Testimoni' }] : []),
+];
+
+// Last word of the brand name is accented, as in the Stitch logo
+const words = brandName.trim().split(/\s+/);
+const lead = words.slice(0, -1).join(' ');
+const tail = words.at(-1);
+---
+
+<header class="sticky top-0 z-50 border-b border-line bg-ground/85 backdrop-blur-xl">
+  <div class="container-x flex h-16 items-center justify-between gap-4">
+    <a href="#top" class="min-w-0 truncate font-display text-title-md font-extrabold uppercase tracking-tight">
+      {lead} <span class="text-accent">{tail}</span>
+    </a>
+
+    <nav aria-label="Navigasi utama" class="hidden items-center gap-8 md:flex">
+      {links.map((l) => <a href={l.href} class="text-label-md text-muted transition-colors hover:text-fg">{l.label}</a>)}
+    </nav>
+
+    <div class="flex items-center gap-2">
+      {waUrl && (
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-wa-track="true"
+          data-wa-location="navbar"
+          class="inline-flex min-h-11 items-center gap-2 rounded-full bg-wa px-4 text-label-md text-white transition-colors hover:bg-wa-hover"
+        >
+          <WhatsAppIcon class="size-4" />
+          <span>WhatsApp</span>
+        </a>
+      )}
+      <button
+        type="button"
+        id="menu-button"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Buka menu navigasi"
+        class="inline-flex size-11 items-center justify-center rounded-control text-fg hover:bg-card md:hidden"
+      >
+        <Menu class="size-6" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" aria-label="Navigasi seluler" hidden class="border-t border-line bg-ground md:hidden">
+    <ul class="container-x py-2">
+      {links.map((l) => (
+        <li><a href={l.href} class="flex min-h-11 items-center text-body-md text-fg">{l.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const button = document.getElementById('menu-button');
+  const menu = document.getElementById('mobile-menu');
+  function setOpen(open: boolean) {
+    button?.setAttribute('aria-expanded', String(open));
+    button?.setAttribute('aria-label', open ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+    if (menu) menu.hidden = !open;
+  }
+  button?.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+  menu?.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) setOpen(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+</script>

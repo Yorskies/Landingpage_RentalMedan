@@ -1,0 +1,36 @@
+---
+import WhatsAppIcon from './WhatsAppIcon.astro';
+
+interface Props { waUrl?: string }
+const { waUrl } = Astro.props;
+---
+
+{waUrl && (
+  <>
+    <!-- Mobile: full-width sticky bar, safe-area aware -->
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-ground/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl md:hidden">
+      <a
+        href={waUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-wa-track="true"
+        data-wa-location="sticky_bar"
+        class="flex min-h-12 items-center justify-center gap-2 rounded-control bg-wa font-display text-title-md font-bold text-white hover:bg-wa-hover"
+      >
+        <WhatsAppIcon /> Tanya via WhatsApp
+      </a>
+    </div>
+    <!-- Desktop: floating button -->
+    <a
+      href={waUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat via WhatsApp"
+      data-wa-track="true"
+      data-wa-location="floating_button"
+      class="fixed bottom-6 right-6 z-40 hidden size-14 items-center justify-center rounded-full bg-wa text-white shadow-glow-wa transition-colors hover:bg-wa-hover md:flex"
+    >
+      <WhatsAppIcon class="size-7" />
+    </a>
+  </>
+)}

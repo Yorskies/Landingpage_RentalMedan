@@ -1,0 +1,40 @@
+---
+import Star from '@lucide/astro/icons/star';
+import type { Testimonial } from '../lib/types';
+
+interface Props { items: Testimonial[] }
+const { items } = Astro.props;
+
+const initials = (name: string) => name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+---
+
+{items.length > 0 && (
+  <section id="testimoni" class="scroll-mt-20 bg-card/60 py-14 md:py-20" aria-labelledby="testimoni-title">
+    <div class="container-x">
+      <header class="mx-auto max-w-2xl text-center">
+        <h2 id="testimoni-title" class="font-display text-headline-lg-mobile md:text-headline-lg">Kata Mereka yang Sudah Menggunakan Layanan Kami</h2>
+      </header>
+
+      <ul class="mt-8 grid gap-6 md:grid-cols-3">
+        {items.map((t) => (
+          <li class="flex flex-col rounded-card border border-line bg-elevated p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="flex gap-0.5 text-accent" role="img" aria-label={`Rating ${t.rating} dari 5`}>
+                {Array.from({ length: 5 }, (_, i) => <Star class:list={['size-4', i < t.rating ? 'fill-current' : 'text-line']} aria-hidden="true" />)}
+              </p>
+              {t.isSample && <span class="rounded-chip bg-line px-2 py-0.5 text-label-sm uppercase text-muted">Contoh</span>}
+            </div>
+            <blockquote class="mt-4 flex-1 text-body-md italic text-fg">“{t.quote}”</blockquote>
+            <footer class="mt-5 flex items-center gap-3">
+              <span class="flex size-10 items-center justify-center rounded-full bg-accent/20 text-label-md text-accent-text" aria-hidden="true">{initials(t.name)}</span>
+              <span>
+                <span class="block text-label-md">{t.name}</span>
+                {t.role && <span class="block text-body-sm text-muted">{t.role}</span>}
+              </span>
+            </footer>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}

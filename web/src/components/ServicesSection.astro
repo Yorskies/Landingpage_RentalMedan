@@ -1,0 +1,69 @@
+---
+import PlaneLanding from '@lucide/astro/icons/plane-landing';
+import Mountain from '@lucide/astro/icons/mountain';
+import Building from '@lucide/astro/icons/building';
+import WhatsAppIcon from './WhatsAppIcon.astro';
+import { buildWhatsAppUrl } from '../lib/formatters';
+
+interface Props { phone?: string }
+const { phone } = Astro.props;
+
+const services = [
+  {
+    slug: 'kno',
+    icon: PlaneLanding,
+    title: 'Antar Jemput Bandara Kualanamu (KNO)',
+    text: 'Penjemputan di Bandara Kualanamu dengan supir berpengalaman. Kabari jadwal kedatangan Anda, kami bantu atur penjemputannya.',
+    cta: 'Tanya Tarif KNO',
+    message: 'Halo Admin, saya melihat dari website. Saya ingin menanyakan tarif antar jemput Bandara Kualanamu (KNO).',
+  },
+  {
+    slug: 'toba',
+    icon: Mountain,
+    title: 'Wisata Danau Toba & Berastagi',
+    text: 'Jelajahi Danau Toba, Samosir, hingga Berastagi bersama supir yang paham rute dan kondisi jalan.',
+    cta: 'Tanya Paket Wisata',
+    message: 'Halo Admin, saya melihat dari website. Saya ingin menanyakan paket sewa mobil untuk wisata Danau Toba.',
+  },
+  {
+    slug: 'korporat',
+    icon: Building,
+    title: 'Perjalanan Dinas & Korporat',
+    text: 'Mobil dan supir untuk perjalanan dinas, tamu perusahaan, atau acara kantor. Tanyakan penawaran untuk sewa berkala.',
+    cta: 'Tanya Kerja Sama',
+    message: 'Halo Admin, saya melihat dari website. Saya ingin menanyakan sewa mobil untuk keperluan dinas/perusahaan.',
+  },
+];
+---
+
+<section id="layanan" class="scroll-mt-20 bg-card/60 py-14 md:py-20" aria-labelledby="layanan-title">
+  <div class="container-x">
+    <header class="max-w-2xl">
+      <p class="text-label-sm uppercase text-accent-text">Spesialis Sumatera Utara</p>
+      <h2 id="layanan-title" class="mt-2 font-display text-headline-lg-mobile md:text-headline-lg">Layanan Populer &amp; Rute Favorit</h2>
+      <p class="mt-3 text-body-md text-muted">Rute antar-kota dan destinasi ikonik ditangani langsung oleh tim supir yang paham rute alternatif dan kondisi lalu lintas.</p>
+    </header>
+
+    <ul class="mt-8 grid gap-6 md:grid-cols-3">
+      {services.map(({ slug, icon: Icon, title, text, cta, message }) => (
+        <li class="flex flex-col rounded-card border border-line border-t-2 border-t-accent bg-elevated p-6">
+          <span class="flex size-12 items-center justify-center rounded-control bg-line text-accent"><Icon class="size-6" aria-hidden="true" /></span>
+          <h3 class="mt-4 font-display text-headline-sm">{title}</h3>
+          <p class="mt-2 flex-1 text-body-sm text-muted">{text}</p>
+          {phone && (
+            <a
+              href={buildWhatsAppUrl(phone, message)}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-wa-track="true"
+              data-wa-location={`service_${slug}`}
+              class="mt-5 inline-flex min-h-11 items-center gap-2 text-label-md text-wa-text hover:text-fg"
+            >
+              <WhatsAppIcon class="size-4" /> {cta}
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

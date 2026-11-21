@@ -1,0 +1,48 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import type { SiteSettings } from '../lib/types';
+
+interface Props { settings: SiteSettings }
+const { settings } = Astro.props;
+
+const highlights = settings.keyTermsHighlights ?? [];
+const groups = [
+  { title: 'Syarat Sewa Lepas Kunci', items: settings.termsSelfDrive },
+  { title: 'Ketentuan Sewa Dengan Supir', items: settings.termsWithDriver },
+  { title: 'Kebijakan Pembatalan & Deposit', items: settings.cancellationPolicy },
+].filter((g): g is { title: string; items: string[] } => Boolean(g.items?.length));
+---
+
+<section id="syarat" class="scroll-mt-20 py-14 md:py-20" aria-labelledby="syarat-title">
+  <div class="container-x max-w-3xl">
+    <header class="text-center">
+      <p class="text-label-sm uppercase text-accent-text">Transparan sejak awal</p>
+      <h2 id="syarat-title" class="mt-2 font-display text-headline-lg-mobile md:text-headline-lg">Syarat &amp; Ketentuan Sewa</h2>
+      <p class="mt-3 text-body-md text-muted">Ketahui syaratnya sebelum memesan, supaya tidak ada kejutan di hari keberangkatan.</p>
+    </header>
+
+    {highlights.length > 0 && (
+      <ul class="mt-8 grid gap-2 rounded-card border border-accent/30 bg-accent/5 p-5 text-body-md sm:grid-cols-2">
+        {highlights.map((h) => (
+          <li class="flex gap-2"><span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>{h}</li>
+        ))}
+      </ul>
+    )}
+
+    <div class="mt-6 grid gap-3">
+      {groups.map((g, i) => (
+        <details open={i === 0} class="group rounded-card border border-line bg-card">
+          <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-display text-title-md [&::-webkit-details-marker]:hidden">
+            {g.title}
+            <ChevronDown class="size-5 shrink-0 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <ul class="grid gap-2 px-5 pb-5 text-body-sm text-muted">
+            {g.items.map((item) => (
+              <li class="flex gap-2"><span class="mt-2 size-1.5 shrink-0 rounded-full bg-subtle" aria-hidden="true"></span>{item}</li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

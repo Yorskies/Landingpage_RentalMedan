@@ -1,0 +1,39 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import CarCatalog from '../components/CarCatalog.astro';
+import ServicesSection from '../components/ServicesSection.astro';
+import TermsAccordion from '../components/TermsAccordion.astro';
+import Testimonials from '../components/Testimonials.astro';
+import FinalCTA from '../components/FinalCTA.astro';
+import Footer from '../components/Footer.astro';
+import FloatingWA from '../components/FloatingWA.astro';
+import { getCars, getSiteSettings, getTestimonials } from '../lib/sanity';
+import { buildWhatsAppUrl, getMinPrice } from '../lib/formatters';
+
+const [cars, settings, testimonials] = await Promise.all([getCars(), getSiteSettings(), getTestimonials()]);
+
+// settings can be null on a production build with an empty dataset: WA CTAs and terms are then omitted
+const phone = settings?.whatsappNumber;
+const waUrl = phone ? buildWhatsAppUrl(phone, 'Halo Admin, saya melihat dari website dan ingin menanyakan ketersediaan armada.') : undefined;
+const hasTerms = Boolean(settings && (settings.termsSelfDrive?.length || settings.termsWithDriver?.length || settings.cancellationPolicy?.length));
+const heroCar = cars.find((c) => c.isFeatured && c.isAvailable) ?? cars[0];
+---
+
+<Layout
+  title={`Sewa Mobil Medan – Lepas Kunci & Dengan Supir${settings ? ` | ${settings.brandName}` : ''}`}
+  description="Sewa mobil di Medan: Lepas Kunci atau Dengan Supir. Antar jemput Bandara Kualanamu dan wisata Danau Toba. Tanya harga & ketersediaan via WhatsApp."
+>
+  <Navbar brandName={settings?.brandName ?? 'Rental Mobil Medan'} waUrl={waUrl} showTerms={hasTerms} showTestimonials={testimonials.length > 0} />
+  <main id="main" class="pb-24 md:pb-0">
+    <Hero minPrice={getMinPrice(cars)} waUrl={waUrl} car={heroCar} />
+    <CarCatalog cars={cars} phone={phone} emptyWaUrl={waUrl} />
+    <ServicesSection phone={phone} />
+    {settings && hasTerms && <TermsAccordion settings={settings} />}
+    <Testimonials items={testimonials} />
+    <FinalCTA waUrl={waUrl} />
+  </main>
+  <Footer settings={settings} />
+  <FloatingWA waUrl={waUrl} />
+</Layout>
